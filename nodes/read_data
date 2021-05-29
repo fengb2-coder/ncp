@@ -3,30 +3,45 @@ import rospy
 from geometry_msgs.msg import Twist, Vector3, TwistWithCovariance
 from sensor_msgs.msg import LaserScan
 import numpy as np
-import csv
+
 
 class Handler: 
     def __init__(self):
         self.csvwriter = None
         self.cmd = None
+        self.scan = None
+        self.store_cmd = []
+        self.store_scan = []
         self.cmd_sub = rospy.Subscriber("/cmd_vel", Twist, self.cmd_callback)
         self.scan_sub = rospy.Subscriber("/front/scan", LaserScan, self.scan_callback)
-
-        with open("data.csv", 'w') as self.csvfile:
-            print("open file")
-            self.csvwriter = csv.writer(self.csvfile)
+        # with open("data.csv", 'w') as self.csvfile:
+        #     print("open file")
+        #     self.csvwriter = csv.writer(self.csvfile)
+        #     self.cmd_sub = rospy.Subscriber("/cmd_vel", Twist, self.cmd_callback)
+        #     self.scan_sub = rospy.Subscriber("/front/scan", LaserScan, self.scan_callback)
+           
+            # while True:
+            #     if self.scan:
+            #         print("write csv ", np.shape(self.scan))
+            #         self.csvwriter.writerows([self.scan, self.cmd])
 
 
     def cmd_callback(self, data):
         self.cmd = data.angular.z
-        print("cmd = ", self.cmd) 
+        print("in cmd ", self.cmd)
+
 
     def scan_callback(self, data):
         if self.cmd:
-            print("in scan ", np.shape(data.ranges))
+            self.scan = data.ranges
+            self.store_scan.append(self.scan)
+            self.store_cmd.append(self.cmd)
+            print("in scan ", np.shape([self.scan]))
+            np.save('data', np.array((self.store_scan, self.store_cmd)))
+            
 
-            scan = data.ranges
-            self.csvwriter.writerows([scan, self.cmd])
+    def get_csvfile(self):
+        return self.csvfile
 
 
 def main():
@@ -34,11 +49,24 @@ def main():
     main 
 
     '''
+
     rospy.init_node('read_data', anonymous = True)
     handler = Handler()
     rospy.spin()
+    # try:
+    #     rospy.init_node('read_data', anonymous = True)
+    #     handler = Handler()
+    #     rospy.spin()
+    # except KeyboardInterrupt:
+    #         pass
+    # finally:
+    #     print("close file")
+    #     handler.get_csvfile().close()
+
 
 if __name__=='__main__':
-    main()
-
+    try:
+        main()
+    except rospy.ROSInterruptException:
+        pass
 

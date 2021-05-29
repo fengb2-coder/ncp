@@ -5,35 +5,28 @@ from sensor_msgs.msg import LaserScan
 import numpy as np
 import csv
 
+class Handler: 
+    def __init__(self):
+        self.csvwriter = None
+        self.cmd = None
+        self.cmd_sub = rospy.Subscriber("/cmd_vel", Twist, self.cmd_callback)
+        self.scan_sub = rospy.Subscriber("/front/scan", LaserScan, self.scan_callback)
 
-csvwriter = None
-
-cmd = []
-
-def cmd_callback(data):
-    cmd = data.angular.z
-    
-
-def scan_callback(data):
-    print(cmd)
-    if (cmd):
-        scan = data.ranges
-        csvwriter.writerows([*scan, cmd])
-
-## join_state publisher
-cmd_sub = rospy.Subscriber("cmd_vel", Twist, cmd_callback)
-scan_sub = rospy.Subscriber("front/scan", LaserScan, scan_callback)
-
-filename = "data.csv"
+        with open("data.csv", 'w') as self.csvfile:
+            print("open file")
+            self.csvwriter = csv.writer(self.csvfile)
 
 
+    def cmd_callback(self, data):
+        self.cmd = data.angular.z
+        print("cmd = ", self.cmd) 
 
+    def scan_callback(self, data):
+        if self.cmd:
+            print("in scan ", np.shape(data.ranges))
 
-
-
-
-
-
+            scan = data.ranges
+            self.csvwriter.writerows([scan, self.cmd])
 
 
 def main():
@@ -42,14 +35,7 @@ def main():
 
     '''
     rospy.init_node('read_data', anonymous = True)
-
-    with open(filename, 'w') as csvfile:
-        csvwriter = csv.writer(csvfile)
-
-
-    
-
-    
+    handler = Handler()
     rospy.spin()
 
 if __name__=='__main__':

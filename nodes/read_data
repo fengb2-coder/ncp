@@ -11,10 +11,8 @@ class Handler:
         self.csvwriter = None
         self.cmd = None
         self.scan = None
-        self.map = None
         self.store_cmd = []
         self.store_scan = []
-        self.store_map = []
         self.cmd_sub = rospy.Subscriber("/cmd_vel", Twist, self.cmd_callback)
         self.scan_sub = rospy.Subscriber("/front/scan", LaserScan, self.scan_callback)
         # self.scan_sub = rospy.Subscriber('/move_base/local_costmap/costmap_updates', OccupancyGridUpdate, self.map_callback)
@@ -33,13 +31,6 @@ class Handler:
             print("in scan ", np.shape([self.scan]))
             np.save('data', np.array((self.store_scan, self.store_cmd)))
 
-    def map_callback(self, data):
-        if self.cmd:
-            self.map = data.data
-            self.store_map.append(self.map)
-            self.store_cmd.append(self.cmd)
-            print("in map ", np.shape([self.map]))
-            np.save('data', np.array((self.store_map, self.store_cmd)))
             
 
     def get_csvfile(self):

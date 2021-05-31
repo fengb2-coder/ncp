@@ -1,0 +1,42 @@
+#!/usr/bin/env python3
+import rospy
+from geometry_msgs.msg import Twist, Vector3, TwistWithCovariance
+from sensor_msgs.msg import LaserScan
+from map_msgs.msg import OccupancyGridUpdate
+import numpy as np
+import tensorflow as tf
+from sensor_msgs.msg import LaserScan
+
+
+
+
+model = tf.keras.models.load_model('/home/bowen/Documents/CPS_Jackal_robot/src/Jackal_NCP/saved_model/model01')
+
+
+class Handler: 
+    def __init__(self):
+        self.angularz = []
+        self.cmd_pub = rospy.Publisher("/cmd_vel", Twist, queue_size = 10)
+        self.scan_sub = rospy.Subscriber("/front/scan", LaserScan, self.scan_callback)
+        # self.scan_sub = rospy.Subscriber('/move_base/local_costmap/costmap_updates', OccupancyGridUpdate, self.map_callback)
+
+
+
+    def scan_callback(self, data):
+        self.angularz = model([[data.data]]).numpy()[0][0][0]
+        self.cmd_pub.publisher(Twist(linear = Vector3(x = 0.5, y = 0.0, z = 0.0), angular = Vector3(x = 0, y = 0, z = self.angularz)))
+
+
+
+
+def main():
+    rospy.init_node('load_model', anonymous = True)
+    handler = Handler()
+    rospy.spin()
+
+
+if __name__=='__main__':
+    try:
+        main()
+    except rospy.ROSInterruptException:
+        pass

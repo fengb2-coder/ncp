@@ -9,12 +9,15 @@ import kerasncp as kncp
 from kerasncp.tf import LTCCell
 
 
-path = '/home/laiy/gitrepos/cyber/ws/src/Jackal_NCP/rosbag/model/model'
-model = tf.keras.models.load_model(path)
+path1 = '/home/bowen/Documents/CPS_Jackal_robot/src/Jackal_NCP/saved_model/modelangular'
+modelangular = tf.keras.models.load_model(path1)
+path2 = '/home/bowen/Documents/CPS_Jackal_robot/src/Jackal_NCP/saved_model/modellinear'
+modellinear = tf.keras.models.load_model(path2)
 
 class Handler: 
     def __init__(self):
         self.angularz = []
+        self.linearx = []
         self.cmd_pub = rospy.Publisher("/cmd_vel", Twist, queue_size = 10)
         self.scan_sub = rospy.Subscriber("/front/scan", LaserScan, self.scan_callback)
 
@@ -27,12 +30,13 @@ class Handler:
         # print("ranges ", np.shape(ranges))
         input = np.array([[ranges]])
         # print("input ", np.shape(input))
-        pred = model(input).numpy()
-        # print("pred = ", pred)
+        pred = modelangular(input).numpy()
+        pred2 = modellinear(input).numpy()
         self.angularz = pred[0][0][0]
+        self.linearx = pred[0][0][0]
         if np.isnan(self.angularz): self.angularz = 0
         print("pred = ", self.angularz)
-        self.cmd_pub.publish(Twist(linear = Vector3(x = 0.25, y = 0.0, z = 0.0), angular = Vector3(x = 0, y = 0, z = self.angularz)))
+        self.cmd_pub.publish(Twist(linear = Vector3(x = self.linearx, y = 0.0, z = 0.0), angular = Vector3(x = 0, y = 0, z = self.angularz)))
 
 
 

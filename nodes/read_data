@@ -9,9 +9,11 @@ import numpy as np
 class Handler: 
     def __init__(self):
         self.csvwriter = None
-        self.cmd = None
+        self.ang = None
+        self.linear = None
         self.scan = None
-        self.store_cmd = []
+        self.store_ang = []
+        self.store_linear = []
         self.store_scan = []
         self.cmd_sub = rospy.Subscriber("/cmd_vel", Twist, self.cmd_callback)
         self.scan_sub = rospy.Subscriber("/front/scan", LaserScan, self.scan_callback)
@@ -19,17 +21,19 @@ class Handler:
 
 
     def cmd_callback(self, data):
-        self.cmd = data.angular.z
-        print("in cmd ", self.cmd)
+        self.linear = data.linear.x
+        self.ang = data.angular.z
 
 
     def scan_callback(self, data):
-        if self.cmd:
+        if self.ang:
             self.scan = data.ranges
             self.store_scan.append(self.scan)
-            self.store_cmd.append(self.cmd)
+            self.store_ang.append(self.ang)
+            self.store_linear.append(self.linear)
             print("in scan ", np.shape([self.scan]))
-            np.save('data', np.array((self.store_scan, self.store_cmd)))
+            print("cmd = ", self.linear , " ", self.ang)
+            np.save('data', np.array((self.store_scan, self.store_ang, self.store_linear)))
 
             
 

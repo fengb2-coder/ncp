@@ -26,7 +26,7 @@ class Handler:
 
 
     def scan_callback(self, data):
-        if self.ang:
+        if self.ang or self.linear:
             self.scan = data.ranges
             self.store_scan.append(self.scan)
             self.store_ang.append(self.ang)

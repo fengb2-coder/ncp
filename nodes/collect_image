@@ -1,0 +1,84 @@
+#!/usr/bin/env python3
+
+import cv2 as cv
+import numpy as np
+import pyrealsense2 as rs
+import rospy
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge
+import string, random
+from geometry_msgs.msg import Twist
+
+# ------------- variables ---------------
+frame_width = 640
+frame_height = 480
+kernel = np.ones((5,5),np.uint8)
+
+# ------------ members for streaming -----------
+pipeline = rs.pipeline()
+config = rs.config()
+config.enable_stream(rs.stream.depth, frame_width, frame_height, rs.format.z16, 30)
+config.enable_stream(rs.stream.color, frame_width, frame_height, rs.format.bgr8, 30)
+profile = pipeline.start(config)
+print("Pipeline INIT")
+
+class Collector:
+    def __init__(self):
+        self. image_pub = rospy.Publisher("/image", Image, queue_size=10)
+        self.bridge = CvBridge()
+        self.color_image = None
+        self.angular = 0
+
+        self.cmd_sub = rospy.Subscriber("/cmd_vel", Twist, self.cmd_callback)
+
+
+        while True:
+            self.process_image()
+            # ---------  keys ----------------
+            key = cv.waitKey(1)
+            if key & 0xFF == ord('q') or key == 27:
+                # Press esc or 'q' to close the image window
+                cv.destroyAllWindows()
+                break
+            elif key & 0xFF == ord('s'):
+                self.save_image()
+        
+    def process_image(self):
+        # get frames 
+        frames = pipeline.wait_for_frames()
+        color_frame = frames.get_color_frame()
+
+        # get camera images
+        self.color_image = np.asanyarray(color_frame.get_data())
+        
+        msg = self.bridge.cv2_to_imgmsg(self.color_image, "bgr8")
+        self.image_pub.publish(msg)
+
+        cv.imshow("Collect Image", self.color_image)
+
+    
+    def save_image(self):
+        print("saving image ", self.angular)
+        letters = string.ascii_lowercase
+        rnd_str = ( ''.join(random.choice(letters) for i in range(10)) )
+        cv.imwrite(f'images/{self.angular}_image_{rnd_str}.png',self.color_image)
+
+    def cmd_callback(self, data):
+        self.angular = data.angular.z
+        self.save_image()
+
+
+
+def main():
+    rospy.init_node('collect_image', anonymous = True)
+    collector = Collector()
+    rospy.spin()
+
+
+if __name__=='__main__':
+    try:
+        main()
+    except Exception as inst:
+            print(inst)
+    finally:
+        pipeline.stop()

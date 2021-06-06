@@ -159,6 +159,7 @@ include_directories(
 catkin_install_python(PROGRAMS
   nodes/read_data
   nodes/load_model
+  nodes/collect_image
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

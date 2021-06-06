@@ -33,7 +33,7 @@ class Handler:
             self.store_linear.append(self.linear)
             print("in scan ", np.shape([self.scan]))
             print("cmd = ", self.linear , " ", self.ang)
-            np.save('data', np.array((self.store_scan, self.store_ang, self.store_linear)))
+            np.save('datacombined', np.array((self.store_scan, self.store_ang, self.store_linear)))
 
             
 
@@ -52,4 +52,3 @@ if __name__=='__main__':
         main()
     except rospy.ROSInterruptException:
         pass
-

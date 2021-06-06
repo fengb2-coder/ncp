@@ -20,14 +20,21 @@ class Handler:
         self.linearx = []
         self.cmd_pub = rospy.Publisher("/cmd_vel", Twist, queue_size = 10)
         self.scan_sub = rospy.Subscriber("/front/scan", LaserScan, self.scan_callback)
+        self.rate = rospy.Rate(1/20) 
 
         print("INIT COMPLETE")
+
+        # while not rospy.is_shutdown(): 
+        #     if self.linearx or self.angularz:       
+        #         self.cmd_pub.publish(Twist(linear = Vector3(x = self.linearx, y = 0.0, z = 0.0), angular = Vector3(x = 0, y = 0, z = self.angularz)))
+
 
 
     def scan_callback(self, data):
         # print("data.ranges ", np.shape(data.ranges))
         ranges = np.transpose(np.asarray([data.ranges])).astype(np.float32)
-        # print("ranges ", np.shape(ranges))
+        ranges = np.nan_to_num(ranges, posinf=100, neginf=100)
+        print("ranges ", np.isnan(ranges.any()))
         input = np.array([[ranges]])
         # print("input ", np.shape(input))
         pred_ang = model_angular(input).numpy()
@@ -37,6 +44,9 @@ class Handler:
         self.linearx = pred_linear[0][0][0]
         if np.isnan(self.angularz): self.angularz = 0
         if np.isnan(self.linearx): self.linearx = 0
+        # if not self.angularz and not self.linearx: 
+            # self.linearx = 0.1 
+            # self.angularz = 0.05
         print("pred = ", self. linearx, " ", self.angularz)
         self.cmd_pub.publish(Twist(linear = Vector3(x = self.linearx, y = 0.0, z = 0.0), angular = Vector3(x = 0, y = 0, z = self.angularz)))
 

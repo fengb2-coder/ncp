@@ -66,11 +66,11 @@ class Collector:
 
     def cmd_callback(self, data):
         self.angular = data.angular.z
-        self.save_image()
 
     def image_callback(self, data):
         try:
             self.color_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
+            self.save_image()
         except CvBridgeError as e:
             print(e)
 

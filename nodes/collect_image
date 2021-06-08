@@ -26,7 +26,7 @@ class Collector:
     def __init__(self):
         self. image_sub = rospy.Subscriber("/camera/color/image_raw", Image, self.image_callback)
         self.bridge = CvBridge()
-        self.color_image = None
+        self.color_image = np.ones((5,5),np.uint8)
         self.angular = 0
 
         self.cmd_sub = rospy.Subscriber("/cmd_vel", Twist, self.cmd_callback)

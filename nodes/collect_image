@@ -72,7 +72,6 @@ class Collector:
         self.color_image = self.bridge.imgmsg_to_cv2(data.data, "bgr8")
 
 
-
 def main():
     rospy.init_node('collect_image', anonymous = True)
     collector = Collector()
@@ -82,7 +81,5 @@ def main():
 if __name__=='__main__':
     try:
         main()
-    except Exception as inst:
-            print(inst)
-    finally:
-        pipeline.stop()
+    except rospy.ROSInterruptException:
+        pass

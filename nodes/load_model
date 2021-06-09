@@ -40,8 +40,13 @@ class Handler:
         #         self.cmd_pub.publish(Twist(linear = Vector3(x = self.linearx, y = 0.0, z = 0.0), angular = Vector3(x = 0, y = 0, z = self.angularz)))
 
         while True:
-            # self.process_image()
             cv.imshow("Filtered Image", self.stored)
+            # ---------  keys ----------------
+            key = cv.waitKey(1)
+            if key & 0xFF == ord('q') or key == 27:
+                # Press esc or 'q' to close the image window
+                cv.destroyAllWindows()
+                break
 
     def scan_callback(self, data):
         # print("data.ranges ", np.shape(data.ranges))

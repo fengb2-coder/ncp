@@ -15,7 +15,7 @@ from cv_bridge import CvBridge, CvBridgeError
 # model_angular = tf.keras.models.load_model(path)
 # path = '/home/laiy/gitrepos/cyber/ws/src/Jackal_NCP/rosbag/model/model_linear'
 # model_linear = tf.keras.models.load_model(path)
-path = '/home/laiy/gitrepos/cyber/ws/src/Jackal_NCP/rosbag/model/model_line'
+path = '/home/bowen/Documents/CPS_Jackal_robot'
 model_line = tf.keras.models.load_model(path)
 
 class Handler: 

@@ -26,6 +26,8 @@ class Handler:
         # self.scan_sub = rospy.Subscriber("/front/scan", LaserScan, self.scan_callback)
         self. image_sub = rospy.Subscriber("/camera/color/image_raw", Image, self.image_callback)
         self.rate = rospy.Rate(1/20) 
+        self.bridge = CvBridge()
+
 
         print("INIT COMPLETE")
 
@@ -61,7 +63,8 @@ class Handler:
             data = np.asarray(image)
             data_flatten = np.transpose(data.flatten())
             data_flatten = np.transpose(np.asarray([data_flatten]))
-            input = test = np.array([[data_flatten]])
+            input = np.array([[data_flatten]])
+            input = tf.keras.utils.normalize(data_flatten)
             pred = model_line(input).numpy()
             self.angularz = pred[0][0][0]
             print("pred = ",  self.angularz)

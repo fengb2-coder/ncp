@@ -71,11 +71,11 @@ class Handler:
     def image_callback(self, data):
         try:
             image = self.bridge.imgmsg_to_cv2(data, "bgr8")
-            image = cv.resize(image, (50,50))
-            cv.imwrite(f'{path} + /tmp.png', image)
+            cv.imwrite(f'tmp.png', image)
             self.stored = image 
 
             # image = cv.imread(f'{path} + /tmp.png', cv.IMREAD_COLOR)
+            image = cv.resize(image, (50,50))
             image = cv.cvtColor(image, cv.COLOR_BGR2RGB)
             img = image
 
@@ -90,7 +90,7 @@ class Handler:
             data = asarray(image)
             data_flatten = np.transpose(data.flatten())
             data_flatten = np.transpose(asarray([data_flatten]))
-            cv.imwrite(f'{path} + /tmp_filtered.png', image)
+            cv.imwrite(f'tmp_filtered.png', image)
 
             input = np.array([[data_flatten]])
             print("input ", np.shape(input))

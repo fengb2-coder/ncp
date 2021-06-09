@@ -92,6 +92,9 @@ class Handler:
 
         except CvBridgeError as e:
             print(e)
+        except:
+            print("no image")
+            pass
 
 
 def main():

@@ -10,6 +10,7 @@ from kerasncp.tf import LTCCell
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 import cv2 as cv
+import matplotlib.pyplot as plt
 
 
 # path = '/home/laiy/gitrepos/cyber/ws/src/Jackal_NCP/rosbag/model/model_angular'
@@ -44,7 +45,7 @@ class Handler:
         ranges = np.nan_to_num(ranges, posinf=100, neginf=100)
         print("ranges ", np.isnan(ranges.any()))
         input = np.array([[ranges]])
-        # print("input ", np.shape(input))
+        
         pred_ang = model_angular(input).numpy()
         pred_linear = model_linear(input).numpy()
         # print("pred = ", pred)
@@ -62,6 +63,7 @@ class Handler:
         try:
             image = self.bridge.imgmsg_to_cv2(data, "bgr8")
             image = cv.resize(image, (50,50))
+            cv.imwrite(f'/home/bowen/Documents/CPS_Jackal_robot/show2.png', image)
 
             img = image
             lower_range = np.array([0, 100, 180]) 
@@ -71,13 +73,13 @@ class Handler:
             result = cv.cvtColor(result, cv.COLOR_BGR2GRAY)
             image = result
 
-            cv.imshow("Display window", image)
-            
+            cv.imwrite(f'/home/bowen/Documents/CPS_Jackal_robot/show.png', image)
+
             data = np.asarray(image)
             data_flatten = np.transpose(data.flatten())
             data_flatten = np.transpose(np.asarray([data_flatten]))
             input = np.array([[data_flatten]])
-            input = tf.keras.utils.normalize(data_flatten)
+            print("input ", np.shape(input))
             pred = model_line(input).numpy()
             self.angularz = pred[0][0][0]
             print("pred = ",  self.angularz)

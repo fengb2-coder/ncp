@@ -9,6 +9,7 @@ import kerasncp as kncp
 from kerasncp.tf import LTCCell
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
+import cv2 as cv
 
 
 # path = '/home/laiy/gitrepos/cyber/ws/src/Jackal_NCP/rosbag/model/model_angular'
@@ -60,6 +61,18 @@ class Handler:
     def image_callback(self, data):
         try:
             image = self.bridge.imgmsg_to_cv2(data, "bgr8")
+            image = cv.resize(image, (50,50))
+
+            img = image
+            lower_range = np.array([0, 100, 180]) 
+            upper_range = np.array([200, 150, 200])   
+            mask = cv.inRange(img,lower_range,upper_range) 
+            result = cv.bitwise_and(img,img,mask = mask) 
+            result = cv.cvtColor(result, cv.COLOR_BGR2GRAY)
+            image = result
+
+            cv.imshow("Display window", image)
+            
             data = np.asarray(image)
             data_flatten = np.transpose(data.flatten())
             data_flatten = np.transpose(np.asarray([data_flatten]))
@@ -68,7 +81,7 @@ class Handler:
             pred = model_line(input).numpy()
             self.angularz = pred[0][0][0]
             print("pred = ",  self.angularz)
-            self.cmd_pub.publish(Twist(linear = Vector3(x = 0.5, y = 0.0, z = 0.0), angular = Vector3(x = 0, y = 0, z = self.angularz)))
+            self.cmd_pub.publish(Twist(linear = Vector3(x = 0.1, y = 0.0, z = 0.0), angular = Vector3(x = 0, y = 0, z = self.angularz)))
 
         except CvBridgeError as e:
             print(e)

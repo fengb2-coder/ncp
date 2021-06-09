@@ -11,6 +11,7 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 import cv2 as cv
 import matplotlib.pyplot as plt
+from numpy import asarray
 
 
 # path = '/home/laiy/gitrepos/cyber/ws/src/Jackal_NCP/rosbag/model/model_angular'
@@ -63,21 +64,25 @@ class Handler:
         try:
             image = self.bridge.imgmsg_to_cv2(data, "bgr8")
             image = cv.resize(image, (50,50))
-            cv.imwrite(f'/home/bowen/Documents/CPS_Jackal_robot/show2.png', image)
+            cv.imwrite(f'{path} + /tmp.png', image)
 
+            image = cv.imread(f'{path} + /tmp.png', cv.IMREAD_COLOR)
+            image = cv.cvtColor(image, cv.COLOR_BGR2RGB)
             img = image
-            lower_range = np.array([0, 100, 180]) 
-            upper_range = np.array([200, 150, 200])   
+
+            # range in BGR
+            lower_range = np.array([0, 100, 150]) 
+            upper_range = np.array([100, 150, 200])   
             mask = cv.inRange(img,lower_range,upper_range) 
             result = cv.bitwise_and(img,img,mask = mask) 
-            result = cv.cvtColor(result, cv.COLOR_BGR2GRAY)
+            result = cv.cvtColor(result, cv.COLOR_RGB2GRAY)
+
             image = result
-
-            cv.imwrite(f'/home/bowen/Documents/CPS_Jackal_robot/show.png', image)
-
-            data = np.asarray(image)
+            data = asarray(image)
             data_flatten = np.transpose(data.flatten())
-            data_flatten = np.transpose(np.asarray([data_flatten]))
+            data_flatten = np.transpose(asarray([data_flatten]))
+            cv.imwrite(f'{path} + /tmp_filtered.png', image)
+
             input = np.array([[data_flatten]])
             print("input ", np.shape(input))
             pred = model_line(input).numpy()

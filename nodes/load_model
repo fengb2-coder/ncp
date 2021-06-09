@@ -72,10 +72,10 @@ class Handler:
         try:
             image = self.bridge.imgmsg_to_cv2(data, "bgr8")
             cv.imwrite(f'tmp.png', image)
-            self.stored = image 
+            # self.stored = image 
 
-            # image = cv.imread(f'{path} + /tmp.png', cv.IMREAD_COLOR)
-            image = cv.resize(image, (50,50))
+            image = cv.imread(f'tmp.png', cv.IMREAD_COLOR)
+            image = cv.resize(image, (200,200))
             image = cv.cvtColor(image, cv.COLOR_BGR2RGB)
             img = image
 
@@ -91,13 +91,21 @@ class Handler:
             data_flatten = np.transpose(data.flatten())
             data_flatten = np.transpose(asarray([data_flatten]))
             cv.imwrite(f'tmp_filtered.png', image)
-
+            self.stored = image
+            
             input = np.array([[data_flatten]])
-            print("input ", np.shape(input))
+            # print("input ", np.shape(input))
             pred = model_line(input).numpy()
             self.angularz = pred[0][0][0]
-            print("pred = ",  self.angularz)
-            self.cmd_pub.publish(Twist(linear = Vector3(x = 0.1, y = 0.0, z = 0.0), angular = Vector3(x = 0, y = 0, z = self.angularz)))
+            print("pred = ", self.angularz)
+            if abs(self.angularz) > 0.03:
+                linear = 0.0
+                self.angularz *= (20/1.2) # image freq = 1.1Hz, cmd freq = 20Hz
+            else:
+                linear = 0.1
+                self.angularz = 0
+            print("cmd = ",  linear , " ", self.angularz)
+            self.cmd_pub.publish(Twist(linear = Vector3(x = linear, y = 0.0, z = 0.0), angular = Vector3(x = 0, y = 0, z = self.angularz)))
 
         except CvBridgeError as e:
             print(e)

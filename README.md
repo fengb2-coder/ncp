@@ -49,7 +49,7 @@ The following files in `/notes` contain information on how to train the models:
 ## Load Model
 Edit load_model to load model and rung Jackal using either velodyne or camera 
 ```
-rosrun ncp load model
+rosrun ncp load_model
 ```  
 
 
